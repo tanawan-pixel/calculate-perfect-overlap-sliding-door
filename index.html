@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Overlap Sliding Door - ระบบคำนวณการตัดเส้นอลูมิเนียม</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #fff9e6;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #ffd700;
+        }
+
+        .input-section h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .summary-box h3 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .summary-value {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .summary-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .summary-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .summary-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        .summary-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .summary-table .total-row {
+            background: #fff3cd;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .summary-table .grand-total-row {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .painting-table {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .painting-table h3 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 1.4em;
+        }
+
+        .painting-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .painting-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .painting-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .painting-table .painting-total-row {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            padding: 5px;
+        }
+
+        .profile-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-header-text {
+            flex: 1;
+        }
+
+        .profile-header-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .profile-code {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .profile-name {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .cutting-plan {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .cutting-plan h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .stick {
+            background: white;
+            border: 2px solid #4caf50;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stick-header {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .stick-bar {
+            height: 40px;
+            background: #c8e6c9;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stick-segment {
+            height: 100%;
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            float: left;
+            border-right: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .stick-waste {
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffcdd2,
+                #ffcdd2 10px,
+                #ef9a9a 10px,
+                #ef9a9a 20px
+            );
+            float: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c62828;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .stick-info {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+
+        .door-diagram {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .door-canvas {
+            border: 3px solid #333;
+            display: inline-block;
+            background: #f0f8ff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .profile-gallery {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .profile-gallery h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .gallery-item-code {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .gallery-item-name {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .painting-input-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #2196f3;
+        }
+
+        .painting-input-section h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .calculate-btn {
+                display: none;
+            }
+
+            .input-section {
+                page-break-inside: avoid;
+            }
+
+            .profile-card {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .summary-value {
+                font-size: 2em;
+            }
+
+            .summary-table {
+                overflow-x: auto;
+            }
+
+            .product-image {
+                width: 40px;
+                height: 40px;
+            }
+
+            .profile-header-image {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Perfect Overlap Sliding Door</h1>
+            <p>ระบบคำนวณการตัดเส้นอลูมิเนียม พร้อมแผนผังและราคา</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <h2>📝 กรอกข้อมูลประตู</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="width">ความกว้างประตู (เมตร)</label>
+                        <input type="number" id="width" step="0.01" value="5" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="height">ความสูงประตู (เมตร)</label>
+                        <input type="number" id="height" step="0.01" value="3" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="tracks">จำนวนราง</label>
+                        <input type="number" id="tracks" value="5" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label for="panels">จำนวนบาน</label>
+                        <input type="number" id="panels" value="5" min="1">
+                    </div>
+                </div>
+                <div class="input-grid" style="margin-top: 20px;">
+                    <div class="input-group">
+                        <label for="installType">ประเภทการติดตั้ง</label>
+                        <select id="installType">
+                            <option value="surface">Surface (แปะฝ้า)</option>
+                            <option value="concealed">Concealed (ฝังฝ้า)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="color">สีอลูมิเนียม</label>
+                        <select id="color" onchange="togglePaintingSection()">
+                            <option value="MILL">MILL</option>
+                            <option value="Champagne">Champagne / Black</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="stockLength">ความยาวเส้นวัตถุดิบ (เมตร)</label>
+                        <input type="number" id="stockLength" step="0.01" value="5.8" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="kerfWidth">ความหนาใบเลื่อย (มม.)</label>
+                        <input type="number" id="kerfWidth" step="0.1" value="1.5" min="0">
+                    </div>
+                </div>
+
+                <div id="paintingInputSection" class="painting-input-section" style="display: none;">
+                    <h4>🎨 ราคาทำสี (สำหรับสี MILL)</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="paintPricePerKg">ราคาทำสีต่อ กก. (บาท)</label>
+                            <input type="number" id="paintPricePerKg" step="0.01" value="180" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label for="paintPricePerSqm">ราคาทำสีต่อ ตรม. (บาท)</label>
+                            <input type="number" id="paintPricePerSqm" step="0.01" value="350" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculate()">🧮 คำนวณ</button>
+            </div>
+
+            <div id="results" class="results" style="display: none;">
+                <div class="profile-gallery">
+                    <h3>🖼️ แคตตาล็อกรหัสเส้นอลูมิเนียม</h3>
+                    <div class="gallery-grid" id="galleryGrid"></div>
+                </div>
+
+                <div class="door-diagram">
+                    <h3 style="margin-bottom: 15px;">📐 แผนผังประตู</h3>
+                    <canvas id="doorCanvas" class="door-canvas"></canvas>
+                </div>
+
+                <div class="summary-box">
+                    <h3>📊 สรุปรวม</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div>
+                            <div style="font-size: 1.2em; color: #666;">จำนวนเส้นทั้งหมด</div>
+                            <div class="summary-value" id="totalSticks" style="font-size: 2.5em;">0</div>
+                            <div>เส้น</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.2em; color: #666;">ราคารวมทั้งหมด</div>
+                            <div class="summary-value" id="totalPrice" style="font-size: 2.5em; color: #27ae60;">0</div>
+                            <div>บาท</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-table">
+                    <h3 style="padding: 20px 20px 10px 20px; font-size: 1.4em; color: #333;">📋 ตารางสรุปรายละเอียด</h3>
+                    <table id="summaryTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">รูปภาพ</th>
+                                <th>รหัส</th>
+                                <th>ชื่อ</th>
+                                <th>ความยาว/ท่อน (ม.)</th>
+                                <th>จำนวนท่อน</th>
+                                <th>จำนวนเส้น 5.8ม.</th>
+                                <th>ราคา/เส้น (บาท)</th>
+                                <th>ราคารวม (บาท)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="paintingCostSection" style="display: none;">
+                    <div class="painting-table">
+                        <h3>🎨 ตารางคำนวณค่าทำสี (คำนวณจากน้ำหนัก)</h3>
+                        <table id="paintingWeightTable">
+                            <thead>
+                                <tr>
+                                    <th>รหัส</th>
+                                    <th>ชื่อ</th>
+                                    <th>น้ำหนัก/เส้น (กก.)</th>
+                                    <th>จำนวนเส้น</th>
+                                    <th>น้ำหนักรวม (กก.)</th>
+                                    <th>ราคา/กก. (บาท)</th>
+                                    <th>ราคาทำสี (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paintingWeightTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="painting-table">
+                        <h3>🎨 ตารางคำนวณค่าทำสี (คำนวณจากตารางเมตร)</h3>
+                        <table id="paintingSqmTable">
+                            <thead>
+                                <tr>
+                                    <th>รหัส</th>
+                                    <th>ชื่อ</th>
+                                    <th>ตรม./เส้น</th>
+                                    <th>จำนวนเส้น</th>
+                                    <th>ตรม.รวม</th>
+                                    <th>ราคา/ตรม. (บาท)</th>
+                                    <th>ราคาทำสี (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paintingSqmTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="profileResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ข้อมูลรูปภาพ
+        const productImages = {
+            'AS-HS-A209-45': 'https://www.siamdeco.com/upload/OPK-A209-45.jpg',
+            'AS-UT-A101': 'https://www.siamdeco.com/upload/AS-UT-A101.jpg',
+            'AS-SC-A211-45': 'https://www.siamdeco.com/upload/OPK-A211-45.jpg',
+            'AS-HC-A212-45': 'https://www.siamdeco.com/upload/AS-HC-A212-45.jpg',
+            'AS-VS-A210-45': 'https://www.siamdeco.com/upload/OPK-A210-45.jpg',
+            'AS-TC-A314-45': 'https://www.siamdeco.com/upload/AS-TC-A314-45.jpg',
+            'AS-TC-A321': 'https://www.siamdeco.com/upload/AS-TC-A321.jpg',
+            'AS-TC-A310': 'https://www.siamdeco.com/upload/AS-TC-A310.jpg',
+            'AS-TC-001': 'https://www.siamdeco.com/upload/AS-TC-001.jpg',
+            'AS-SF-001': 'https://www.siamdeco.com/upload/AS-SF-001.jpg'
+        };
+
+        // ข้อมูลราคา
+        const priceData = {
+            'AS-UT-A101': { MILL: 2022.00, Champagne: 2516.00 },
+            'AS-HS-A209-45': { MILL: 1346.00, Champagne: 1675.00 },
+            'AS-VS-A210-45': { MILL: 797.00, Champagne: 992.00 },
+            'AS-SC-A211-45': { MILL: 625.00, Champagne: 570.00 },
+            'AS-HC-A212-45': { MILL: 478.00, Champagne: 594.00 },
+            'AS-TC-A321': { MILL: 344.00, Champagne: 429.00 },
+            'AS-TC-A314-45': { MILL: 239.00, Champagne: 297.00 },
+            'AS-TC-A310': { MILL: 128.00, Champagne: 160.00 },
+            'AS-SF-001': { MILL: 780.00, Champagne: 971.00 },
+            'AS-TC-001': { MILL: 350.00, Champagne: 450.00 }
+        };
+
+        // ข้อมูลน้ำหนักและตรม.
+        const weightData = {
+            'AS-HS-A209-45': { weight: 5.47, sqm: 0.8 },
+            'AS-UT-A101': { weight: 8.22, sqm: 0.62 },
+            'AS-SC-A211-45': { weight: 1.86, sqm: 0.5 },
+            'AS-HC-A212-45': { weight: 1.94, sqm: 0.56 },
+            'AS-VS-A210-45': { weight: 3.24, sqm: 0.43 },
+            'AS-TC-A314-45': { weight: 0.97, sqm: 0.27 },
+            'AS-TC-A321': { weight: 1.4, sqm: 0.31 },
+            'AS-TC-A310': { weight: 0.52, sqm: 0.13 },
+            'AS-TC-001': { weight: 0.73, sqm: 0.19 },
+            'AS-SF-001': { weight: 0.67, sqm: 1.0 }
+        };
+
+        function togglePaintingSection() {
+            const color = document.getElementById('color').value;
+            const paintingSection = document.getElementById('paintingInputSection');
+            if (color === 'MILL') {
+                paintingSection.style.display = 'block';
+            } else {
+                paintingSection.style.display = 'none';
+            }
+        }
+
+        function drawDoor(width, height, tracks, panels, installType) {
+            const canvas = document.getElementById('doorCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const scale = 100;
+            const padding = 60;
+            canvas.width = (width * scale) + (padding * 2);
+            canvas.height = (height * scale) + (padding * 2);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const doorWidth = width * scale;
+            const doorHeight = height * scale;
+            const panelWidth = doorWidth / panels;
+
+            ctx.strokeStyle = '#c62828';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(padding, padding, doorWidth, doorHeight);
+            ctx.fillStyle = '#c62828';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('AS-SF-001', padding - 50, padding + doorHeight / 2);
+            ctx.fillText('Side Frame', padding - 50, padding + doorHeight / 2 + 15);
+
+            ctx.strokeStyle = '#1976d2';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < tracks; i++) {
+                const y = padding + (i * (doorHeight / (tracks - 1)));
+                if (i === 0 || i === tracks - 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding, y);
+                    ctx.lineTo(padding + doorWidth, y);
+                    ctx.stroke();
+                    ctx.fillStyle = '#1976d2';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.fillText('AS-UT-A101', padding + doorWidth + 10, y + 5);
+                }
+            }
+
+            if (installType === 'surface') {
+                ctx.strokeStyle = '#9c27b0';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 3]);
+
+                for (let i = 1; i < tracks; i++) {
+                    const y = padding + (i * (doorHeight / (tracks - 1)));
+                    ctx.beginPath();
+                    ctx.moveTo(padding, y - 5);
+                    ctx.lineTo(padding + doorWidth, y - 5);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = '#9c27b0';
+                ctx.font = '10px Arial';
+                ctx.fillText('AS-TC-A314-45', padding + 10, padding + 15);
+                ctx.fillText('AS-TC-A321', padding + 10, padding + doorHeight - 10);
+                ctx.fillText('AS-TC-A310', padding + doorWidth - 80, padding + doorHeight - 10);
+
+                ctx.setLineDash([]);
+            } else {
+                ctx.strokeStyle = '#9c27b0';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 3]);
+                ctx.beginPath();
+                ctx.moveTo(padding, padding - 10);
+                ctx.lineTo(padding + doorWidth, padding - 10);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#9c27b0';
+                ctx.font = '10px Arial';
+                ctx.fillText('AS-TC-001', padding + doorWidth / 2 - 30, padding - 15);
+            }
+
+            for (let i = 0; i < panels; i++) {
+                const x = padding + (i * panelWidth);
+
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + 2, padding + 2, panelWidth - 4, doorHeight - 4);
+
+                ctx.strokeStyle = '#ff9800';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x + 5, padding + 5);
+                ctx.lineTo(x + panelWidth - 5, padding + 5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x + 5, padding + doorHeight - 5);
+                ctx.lineTo(x + panelWidth - 5, padding + doorHeight - 5);
+                ctx.stroke();
+
+                if (i === 0) {
+                    ctx.fillStyle = '#ff9800';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillText('AS-HS-A209-45', x + 5, padding + 25);
+                    ctx.fillText('Horizontal', x + 5, padding + 37);
+                }
+
+                if (i === 0) {
+                    ctx.strokeStyle = '#4caf50';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 3, padding + 10);
+                    ctx.lineTo(x + 3, padding + doorHeight - 10);
+                    ctx.stroke();
+                    ctx.fillStyle = '#4caf50';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.save();
+                    ctx.translate(x - 5, padding + doorHeight / 2);
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.fillText('AS-SC-A211-45', 0, 0);
+                    ctx.restore();
+                } else if (i === panels - 1) {
+                    ctx.strokeStyle = '#4caf50';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(x + panelWidth - 3, padding + 10);
+                    ctx.lineTo(x + panelWidth - 3, padding + doorHeight - 10);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeStyle = '#e91e63';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x + panelWidth - 2, padding + 10);
+                    ctx.lineTo(x + panelWidth - 2, padding + doorHeight - 10);
+                    ctx.stroke();
+
+                    if (i === 1) {
+                        ctx.fillStyle = '#e91e63';
+                        ctx.font = 'bold 9px Arial';
+                        ctx.save();
+                        ctx.translate(x + panelWidth + 8, padding + doorHeight / 2);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText('AS-HC-A212-45', 0, 0);
+                        ctx.fillText('AS-VS-A210-45', 0, 12);
+                        ctx.restore();
+                    }
+                }
+
+                ctx.fillStyle = '#666';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText((i + 1).toString(), x + panelWidth / 2 - 5, padding + doorHeight / 2);
+            }
+
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`กว้าง ${width} ม.`, padding + doorWidth / 2 - 40, canvas.height - 20);
+            ctx.save();
+            ctx.translate(20, padding + doorHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`สูง ${height} ม.`, 0, 0);
+            ctx.restore();
+
+            ctx.fillText(`${panels} บาน, ${tracks} ราง`, padding + doorWidth / 2 - 50, padding - 30);
+            ctx.fillText(`ประเภท: ${installType === 'surface' ? 'Surface (แปะฝ้า)' : 'Concealed (ฝังฝ้า)'}`, padding + doorWidth / 2 - 80, padding - 15);
+        }
+
+        function createGallery(profiles) {
+            const galleryGrid = document.getElementById('galleryGrid');
+            galleryGrid.innerHTML = '';
+
+            profiles.forEach(profile => {
+                const imageUrl = productImages[profile.code] || '';
+                if (imageUrl) {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                        <img src="${imageUrl}" alt="${profile.code}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                        <div class="gallery-item-code">${profile.code}</div>
+                        <div class="gallery-item-name">${profile.name}</div>
+                    `;
+                    galleryGrid.appendChild(item);
+                }
+            });
+        }
+
+        function calculate() {
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const tracks = parseInt(document.getElementById('tracks').value);
+            const panels = parseInt(document.getElementById('panels').value);
+            const stockLength = parseFloat(document.getElementById('stockLength').value);
+            const kerfWidth = parseFloat(document.getElementById('kerfWidth').value) / 1000;
+            const installType = document.getElementById('installType').value;
+            const color = document.getElementById('color').value;
+            const paintPricePerKg = parseFloat(document.getElementById('paintPricePerKg').value);
+            const paintPricePerSqm = parseFloat(document.getElementById('paintPricePerSqm').value);
+
+            if (!width || !height || !tracks || !panels || !stockLength) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            const profiles = [
+                {
+                    code: 'AS-HS-A209-45',
+                    name: 'Horizontal Sash 45',
+                    length: width / panels,
+                    quantity: panels * 2,
+                    note: 'บน-ล่างของบาน ใช้ตามความกว้างบาน'
+                },
+                {
+                    code: 'AS-UT-A101',
+                    name: 'Single Track (Perfect)',
+                    length: width,
+                    quantity: tracks,
+                    note: 'ราง'
+                },
+                {
+                    code: 'AS-SC-A211-45',
+                    name: 'Vertical Sash Cover',
+                    length: height,
+                    quantity: 2,
+                    note: 'อยู่ริมสุดของบานซ้ายและขวา'
+                },
+                {
+                    code: 'AS-HC-A212-45',
+                    name: 'Vertical Sash Outer 45 Hook',
+                    length: height,
+                    quantity: (panels - 1) * 2,
+                    note: 'อยู่ข้างซ้าย-ขวาของทุกบาน'
+                },
+                {
+                    code: 'AS-VS-A210-45',
+                    name: 'Vertical Sash Inner 45',
+                    length: height,
+                    quantity: 2 + ((panels - 1) * 2),
+                    note: 'ใช้ครอบตัว AS-SC-A211-45 และ AS-HC-A212-45'
+                },
+                {
+                    code: 'AS-TC-A314-45',
+                    name: 'MILL Ceiling Track Cover (Middle)',
+                    length: width,
+                    quantity: tracks - 1,
+                    note: 'อยู่ระหว่างราง'
+                },
+                {
+                    code: 'AS-SF-001',
+                    name: 'Side Frame (Sliding)',
+                    length: height,
+                    quantity: 2,
+                    note: 'แปะอยู่กับผนังซ้ายสุด-ขวาสุด'
+                }
+            ];
+
+            if (installType === 'surface') {
+                profiles.splice(6, 0, {
+                    code: 'AS-TC-A321',
+                    name: 'Side Track Cover 45 Show Track',
+                    length: width,
+                    quantity: 2,
+                    note: 'ใช้ตามความยาวราง AS-UT-A101'
+                });
+                profiles.splice(7, 0, {
+                    code: 'AS-TC-A310',
+                    name: 'Ceiling Track Cover (Side)',
+                    length: width,
+                    quantity: 2,
+                    note: 'ใช้ตามความยาวราง AS-UT-A101'
+                });
+            } else {
+                profiles.splice(6, 0, {
+                    code: 'AS-TC-001',
+                    name: 'Track Cover (Concealed)',
+                    length: width,
+                    quantity: 1,
+                    note: 'ใช้กับ Concealed เท่านั้น'
+                });
+            }
+
+            createGallery(profiles);
+
+            let totalSticks = 0;
+            let totalPrice = 0;
+            let resultsHTML = '';
+            let summaryRows = '';
+            let paintingWeightRows = '';
+            let paintingSqmRows = '';
+            let totalWeight = 0;
+            let totalSqm = 0;
+
+            profiles.forEach(profile => {
+                const result = calculateCutting(profile, stockLength, kerfWidth);
+                const pricePerStick = priceData[profile.code] ? priceData[profile.code][color] : 0;
+                const totalProfilePrice = pricePerStick * result.totalSticks;
+
+                totalSticks += result.totalSticks;
+                totalPrice += totalProfilePrice;
+
+                resultsHTML += generateProfileCard(profile, result, stockLength, pricePerStick, totalProfilePrice);
+
+                const imageUrl = productImages[profile.code] || '';
+                summaryRows += `
+                    <tr>
+                        <td style="text-align: center;">
+                            <img src="${imageUrl}" class="product-image" alt="${profile.code}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23f0f0f0%22 width=%2260%22 height=%2260%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2210%22%3E?%3C/text%3E%3C/svg%3E'">
+                        </td>
+                        <td><strong>${profile.code}</strong></td>
+                        <td>${profile.name}</td>
+                        <td style="text-align: center;">${profile.length.toFixed(2)}</td>
+                        <td style="text-align: center;">${profile.quantity}</td>
+                        <td style="text-align: center;"><strong>${result.totalSticks}</strong></td>
+                        <td style="text-align: right;">${pricePerStick.toFixed(2)}</td>
+                        <td style="text-align: right;"><strong>${totalProfilePrice.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+
+                // คำนวณค่าทำสีถ้าเลือก MILL
+                if (color === 'MILL' && weightData[profile.code]) {
+                    const weightPerStick = weightData[profile.code].weight;
+                    const sqmPerStick = weightData[profile.code].sqm;
+                    const profileWeight = weightPerStick * result.totalSticks;
+                    const profileSqm = sqmPerStick * result.totalSticks;
+                    const paintCostWeight = profileWeight * paintPricePerKg;
+                    const paintCostSqm = profileSqm * paintPricePerSqm;
+
+                    totalWeight += profileWeight;
+                    totalSqm += profileSqm;
+
+                    paintingWeightRows += `
+                        <tr>
+                            <td><strong>${profile.code}</strong></td>
+                            <td>${profile.name}</td>
+                            <td style="text-align: center;">${weightPerStick.toFixed(2)}</td>
+                            <td style="text-align: center;">${result.totalSticks}</td>
+                            <td style="text-align: center;"><strong>${profileWeight.toFixed(2)}</strong></td>
+                            <td style="text-align: right;">${paintPricePerKg.toFixed(2)}</td>
+                            <td style="text-align: right;"><strong>${paintCostWeight.toFixed(2)}</strong></td>
+                        </tr>
+                    `;
+
+                    paintingSqmRows += `
+                        <tr>
+                            <td><strong>${profile.code}</strong></td>
+                            <td>${profile.name}</td>
+                            <td style="text-align: center;">${sqmPerStick.toFixed(2)}</td>
+                            <td style="text-align: center;">${result.totalSticks}</td>
+                            <td style="text-align: center;"><strong>${profileSqm.toFixed(2)}</strong></td>
+                            <td style="text-align: right;">${paintPricePerSqm.toFixed(2)}</td>
+                            <td style="text-align: right;"><strong>${paintCostSqm.toFixed(2)}</strong></td>
+                        </tr>
+                    `;
+                }
+            });
+
+            summaryRows += `
+                <tr class="grand-total-row">
+                    <td></td>
+                    <td colspan="4" style="text-align: right; padding-right: 20px;">รวมทั้งหมด</td>
+                    <td style="text-align: center;"><strong>${totalSticks}</strong></td>
+                    <td></td>
+                    <td style="text-align: right;"><strong>${totalPrice.toFixed(2)}</strong></td>
+                </tr>
+            `;
+
+            // สรุปค่าทำสี
+            if (color === 'MILL') {
+                const operationCost = 5500;
+                const totalPaintCostWeight = (totalWeight * paintPricePerKg) + operationCost;
+                const totalPaintCostSqm = (totalSqm * paintPricePerSqm) + operationCost;
+
+                paintingWeightRows += `
+                    <tr class="painting-total-row">
+                        <td colspan="4" style="text-align: right; padding-right: 20px;"><strong>รวมน้ำหนักทั้งหมด</strong></td>
+                        <td style="text-align: center;"><strong>${totalWeight.toFixed(2)} กก.</strong></td>
+                        <td></td>
+                        <td style="text-align: right;"><strong>${(totalWeight * paintPricePerKg).toFixed(2)}</strong></td>
+                    </tr>
+                    <tr class="painting-total-row">
+                        <td colspan="6" style="text-align: right; padding-right: 20px;"><strong>ค่าดำเนินการทำสี</strong></td>
+                        <td style="text-align: right;"><strong>${operationCost.toFixed(2)}</strong></td>
+                    </tr>
+                    <tr class="painting-total-row" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <td colspan="6" style="text-align: right; padding-right: 20px; font-size: 1.1em;"><strong>รวมค่าทำสีทั้งหมด (น้ำหนัก)</strong></td>
+                        <td style="text-align: right; font-size: 1.1em;"><strong>${totalPaintCostWeight.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+
+                paintingSqmRows += `
+                    <tr class="painting-total-row">
+                        <td colspan="4" style="text-align: right; padding-right: 20px;"><strong>รวมตารางเมตรทั้งหมด</strong></td>
+                        <td style="text-align: center;"><strong>${totalSqm.toFixed(2)} ตรม.</strong></td>
+                        <td></td>
+                        <td style="text-align: right;"><strong>${(totalSqm * paintPricePerSqm).toFixed(2)}</strong></td>
+                    </tr>
+                    <tr class="painting-total-row">
+                        <td colspan="6" style="text-align: right; padding-right: 20px;"><strong>ค่าดำเนินการทำสี</strong></td>
+                        <td style="text-align: right;"><strong>${operationCost.toFixed(2)}</strong></td>
+                    </tr>
+                    <tr class="painting-total-row" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <td colspan="6" style="text-align: right; padding-right: 20px; font-size: 1.1em;"><strong>รวมค่าทำสีทั้งหมด (ตรม.)</strong></td>
+                        <td style="text-align: right; font-size: 1.1em;"><strong>${totalPaintCostSqm.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('totalSticks').textContent = totalSticks;
+            document.getElementById('totalPrice').textContent = totalPrice.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('profileResults').innerHTML = resultsHTML;
+            document.getElementById('summaryTableBody').innerHTML = summaryRows;
+
+            // แสดงตารางทำสีถ้าเลือก MILL
+            if (color === 'MILL') {
+                document.getElementById('paintingWeightTableBody').innerHTML = paintingWeightRows;
+                document.getElementById('paintingSqmTableBody').innerHTML = paintingSqmRows;
+                document.getElementById('paintingCostSection').style.display = 'block';
+            } else {
+                document.getElementById('paintingCostSection').style.display = 'none';
+            }
+
+            document.getElementById('results').style.display = 'block';
+
+            drawDoor(width, height, tracks, panels, installType);
+
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function calculateCutting(profile, stockLength, kerfWidth) {
+            const cutLength = profile.length;
+            const quantity = profile.quantity;
+
+            let piecesPerStick = 0;
+            let remainingLength = stockLength;
+
+            while (remainingLength >= cutLength) {
+                piecesPerStick++;
+                remainingLength -= (cutLength + kerfWidth);
+            }
+
+            if (piecesPerStick === 0) {
+                piecesPerStick = 1;
+                remainingLength = 0;
+            }
+
+            const totalSticks = Math.ceil(quantity / piecesPerStick);
+
+            const cuttingPlan = [];
+            let remainingPieces = quantity;
+
+            for (let i = 0; i < totalSticks; i++) {
+                const piecesInThisStick = Math.min(piecesPerStick, remainingPieces);
+                let usedLength = (piecesInThisStick * cutLength) + ((piecesInThisStick - 1) * kerfWidth);
+                if (piecesInThisStick === 0) usedLength = 0;
+                const wasteLength = stockLength - usedLength;
+
+                cuttingPlan.push({
+                    stickNumber: i + 1,
+                    pieces: piecesInThisStick,
+                    usedLength: usedLength,
+                    wasteLength: wasteLength,
+                    wastePercentage: (wasteLength / stockLength * 100).toFixed(2)
+                });
+
+                remainingPieces -= piecesInThisStick;
+            }
+
+            return {
+                piecesPerStick: piecesPerStick,
+                totalSticks: totalSticks,
+                cuttingPlan: cuttingPlan
+            };
+        }
+
+        function generateProfileCard(profile, result, stockLength, pricePerStick, totalPrice) {
+            let cuttingPlanHTML = '';
+
+            result.cuttingPlan.forEach(plan => {
+                const usedPercentage = (plan.usedLength / stockLength * 100).toFixed(1);
+                const wastePercentage = (plan.wasteLength / stockLength * 100).toFixed(1);
+
+                let segmentsHTML = '';
+                for (let i = 0; i < plan.pieces; i++) {
+                    const segmentWidth = (profile.length / stockLength * 100).toFixed(1);
+                    segmentsHTML += `<div class="stick-segment" style="width: ${segmentWidth}%">${profile.length.toFixed(2)}ม.</div>`;
+                }
+
+                cuttingPlanHTML += `
+                    <div class="stick">
+                        <div class="stick-header">เส้นที่ ${plan.stickNumber}</div>
+                        <div class="stick-bar">
+                            ${segmentsHTML}
+                            <div class="stick-waste" style="width: ${wastePercentage}%">เหลือ ${plan.wasteLength.toFixed(3)}ม.</div>
+                        </div>
+                        <div class="stick-info">
+                            ✂️ ตัด ${plan.pieces} ท่อน | 
+                            📏 ใช้ไป ${plan.usedLength.toFixed(3)} ม. (${usedPercentage}%) | 
+                            ♻️ เหลือ ${plan.wasteLength.toFixed(3)} ม. (${wastePercentage}%)
+                        </div>
+                    </div>
+                `;
+            });
+
+            const imageUrl = productImages[profile.code] || '';
+
+            return `
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-header-text">
+                            <div class="profile-code">${profile.code}</div>
+                            <div class="profile-name">${profile.name}</div>
+                        </div>
+                        <img src="${imageUrl}" class="profile-header-image" alt="${profile.code}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22%3E%3Crect fill=%22white%22 width=%2280%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <div class="detail-label">ความยาวที่ต้องตัด</div>
+                            <div class="detail-value">${profile.length.toFixed(2)} ม.</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">จำนวนท่อนที่ต้องใช้</div>
+                            <div class="detail-value">${profile.quantity} ท่อน</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ท่อนต่อเส้น 5.8ม.</div>
+                            <div class="detail-value">${result.piecesPerStick} ท่อน</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">จำนวนเส้นที่ต้องใช้</div>
+                            <div class="detail-value" style="color: #ff6b6b;">${result.totalSticks} เส้น</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ราคาต่อเส้น</div>
+                            <div class="detail-value" style="color: #27ae60;">${pricePerStick.toFixed(2)} บาท</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ราคารวม</div>
+                            <div class="detail-value" style="color: #27ae60;">${totalPrice.toFixed(2)} บาท</div>
+                        </div>
+                    </div>
+
+                    <div class="cutting-plan">
+                        <h4>📐 แผนผังการตัด</h4>
+                        ${cuttingPlanHTML}
+                    </div>
+
+                    <div class="note">
+                        <strong>📌 หมายเหตุ:</strong> ${profile.note}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            togglePaintingSection();
+            calculate();
+        };
+    </script>
+</body>
+</html>
